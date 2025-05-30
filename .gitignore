@@ -66,3 +66,12 @@ lerna-debug.log*
 .env.test.local
 .env.production.local
 .env.local
+
+# Python
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+*.so
+.pytest_cache/

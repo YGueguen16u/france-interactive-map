@@ -9,6 +9,8 @@
  */
 
 import { FranceMap } from './components/FranceMap';
+import 'leaflet/dist/leaflet.css';
+import './App.css';
 
 /**
  * App Component

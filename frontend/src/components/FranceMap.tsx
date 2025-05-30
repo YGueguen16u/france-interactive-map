@@ -1,5 +1,5 @@
 /**
- * File: src/components/FranceMap.tsx
+ * File: frontend/src/components/FranceMap.tsx
  * 
  * Main component for displaying the interactive map of France.
  * This component handles the initialization of the Leaflet map and
@@ -32,9 +32,12 @@ const MAP_CONFIG = {
  */
 const BOUNDARY_STYLES = {
   region: {
-    color: '#3388ff',
-    weight: 2,
-    fillOpacity: 0.1
+    color: '#2c3e50',      // Couleur plus foncée pour les bordures
+    weight: 1.5,           // Ligne plus fine
+    opacity: 0.8,          // Bordure légèrement transparente
+    fillColor: '#3498db',  // Couleur de remplissage différente
+    fillOpacity: 0.15,     // Remplissage très léger
+    smoothFactor: 1.5      // Lissage des polygones
   }
 };
 
@@ -54,27 +57,41 @@ export const FranceMap = () => {
    * This effect runs once when the component mounts
    */
   useEffect(() => {
+    console.log('FranceMap component mounted');
     // Initialize map if not already done
     if (!mapRef.current) {
-      // Create map instance
-      mapRef.current = L.map('map').setView(MAP_CONFIG.center, MAP_CONFIG.defaultZoom);
-      
-      // Add OpenStreetMap tile layer
-      L.tileLayer(MAP_CONFIG.tileUrl, {
-        attribution: MAP_CONFIG.attribution
-      }).addTo(mapRef.current);
+      console.log('Creating new map instance');
+      try {
+        // Create map instance
+        mapRef.current = L.map('map').setView(MAP_CONFIG.center, MAP_CONFIG.defaultZoom);
+        console.log('Map instance created');
+        
+        // Add OpenStreetMap tile layer
+        L.tileLayer(MAP_CONFIG.tileUrl, {
+          attribution: MAP_CONFIG.attribution
+        }).addTo(mapRef.current);
+        console.log('Tile layer added');
 
-      // Load and display region boundaries
-      fetch('/data/france-regions.geojson')
-        .then(response => response.json())
-        .then((data: GeoFeatureCollection) => {
-          L.geoJSON(data, {
-            style: BOUNDARY_STYLES.region
-          }).addTo(mapRef.current!);
-        })
-        .catch(error => {
-          console.error('Failed to load region boundaries:', error);
-        });
+        // Load and display region boundaries
+        console.log('Fetching GeoJSON data...');
+        fetch('/data/france-regions.geojson')
+          .then(response => {
+            console.log('GeoJSON response received');
+            return response.json();
+          })
+          .then((data: GeoFeatureCollection) => {
+            console.log('GeoJSON data parsed:', data);
+            L.geoJSON(data, {
+              style: BOUNDARY_STYLES.region
+            }).addTo(mapRef.current!);
+            console.log('GeoJSON layer added to map');
+          })
+          .catch(error => {
+            console.error('Failed to load region boundaries:', error);
+          });
+      } catch (error) {
+        console.error('Error initializing map:', error);
+      }
     }
 
     // Cleanup function to remove map when component unmounts
