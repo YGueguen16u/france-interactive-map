@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+  # Frontend
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_GEO_API_URL=http://geo-api:8001
+      - VITE_STATS_API_URL=http://stats-api:8002
+      - VITE_ELECTIONS_API_URL=http://elections-api:8003
+      - VITE_SERVICES_API_URL=http://services-api:8004
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - geo-api
+      - stats-api
+      - elections-api
+      - services-api
+
+  # API Géographique
+  geo-api:
+    build: 
+      context: ./apis/geo-api
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./apis/geo-api:/app
+    environment:
+      - MONGODB_URL=mongodb://mongodb:27017/geo
+      - CORS_ORIGINS=http://localhost:5173
+    depends_on:
+      - mongodb
+      - redis
+
+  # API Statistiques
+  stats-api:
+    build:
+      context: ./apis/stats-api
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./apis/stats-api:/app
+    environment:
+      - MONGODB_URL=mongodb://mongodb:27017/stats
+      - CORS_ORIGINS=http://localhost:5173
+    depends_on:
+      - mongodb
+      - redis
+
+  # API Élections
+  elections-api:
+    build:
+      context: ./apis/elections-api
+      dockerfile: Dockerfile
+    ports:
+      - "8003:8000"
+    volumes:
+      - ./apis/elections-api:/app
+    environment:
+      - MONGODB_URL=mongodb://mongodb:27017/elections
+      - CORS_ORIGINS=http://localhost:5173
+    depends_on:
+      - mongodb
+      - redis
+
+  # API Services Publics
+  services-api:
+    build:
+      context: ./apis/services-api
+      dockerfile: Dockerfile
+    ports:
+      - "8004:8000"
+    volumes:
+      - ./apis/services-api:/app
+    environment:
+      - MONGODB_URL=mongodb://mongodb:27017/services
+      - CORS_ORIGINS=http://localhost:5173
+    depends_on:
+      - mongodb
+      - redis
+
+  # Base de données
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=france_map
+
+  # Redis pour le cache
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  mongodb_data:
+  redis_data:
